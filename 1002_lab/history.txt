@@ -1,0 +1,5 @@
+*   dac64fb Merge branch 'feature/categories' into develop
+|\  
+| * 19b41b2 feat: add categories support
+|/  
+* a15d655 feat: initial project setup with FastAPI

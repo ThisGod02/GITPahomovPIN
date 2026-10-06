@@ -1,0 +1,4 @@
+[submodule "libs/shared"]
+	path = libs/shared
+	url = git@gitlab.com:username/shared-library.git
+	branch = main

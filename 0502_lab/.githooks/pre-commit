@@ -1,0 +1,42 @@
+#!/bin/bash
+# pre-commit: проверка синтаксиса Python и поиск секретов
+echo "Проверка синтаксиса Python-файлов..."
+STAGED_PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$')
+if [ -z "$STAGED_PYTHON_FILES" ]; then
+  echo "Python-файлы не найдены. Пропускаем проверку."
+else
+  ERRORS=0
+  for FILE in $STAGED_PYTHON_FILES; do
+    [ -f "$FILE" ] || continue
+    echo "Проверка: $FILE"
+    if ! python3 -m py_compile "$FILE"; then
+      echo "Синтаксическая ошибка в $FILE"
+      ERRORS=1
+    fi
+  done
+  if [ "$ERRORS" -eq 1 ]; then
+    echo "Коммит отклонён: исправьте синтаксические ошибки."
+    exit 1
+  fi
+  echo "Все Python-файлы прошли проверку синтаксиса."
+fi
+echo "Проверка на наличие секретов..."
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+PATTERNS=("password\s*=\s*['\"][^'\"]+['\"]" "secret\s*=\s*['\"][^'\"]+['\"]" "token\s*=\s*['\"][^'\"]+['\"]" "api_key\s*=\s*['\"][^'\"]+['\"]")
+FOUND=0
+for FILE in $STAGED_FILES; do
+  [ -f "$FILE" ] || continue
+  for PATTERN in "${PATTERNS[@]}"; do
+    if grep -E -n "$PATTERN" "$FILE" > /dev/null 2>&1; then
+      echo "Обнаружен потенциальный секрет в файле: $FILE"
+      grep -E -n "$PATTERN" "$FILE"
+      FOUND=1
+    fi
+  done
+done
+if [ "$FOUND" -eq 1 ]; then
+  echo "Коммит отклонён: удалите секреты из кода. Используйте переменные окружения."
+  exit 1
+fi
+echo "Секреты не найдены."
+exit 0

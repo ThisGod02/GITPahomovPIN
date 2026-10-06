@@ -1,0 +1,12 @@
+#!/bin/bash
+# commit-msg: проверка формата Conventional Commits
+MSG_FILE="$1"
+MSG=$(head -n1 "$MSG_FILE")
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?: .+"
+if ! echo "$MSG" | grep -Eq "$PATTERN"; then
+  echo "Неверный формат сообщения коммита: $MSG"
+  echo "Ожидается Conventional Commits: <type>(<scope>): <subject>"
+  echo "Типы: feat, fix, docs, style, refactor, perf, test, chore, ci, build"
+  exit 1
+fi
+exit 0

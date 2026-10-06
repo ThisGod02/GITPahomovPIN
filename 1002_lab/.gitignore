@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+env/
+venv/
+dist/
+build/
+*.log
+# Node.js
+node_modules/
+.env
+# IDE
+.vscode/
+.idea/
+# System
+.DS_Store
+Thumbs.db
+# Secrets
+*.key
+*.pem

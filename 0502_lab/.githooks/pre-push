@@ -1,0 +1,13 @@
+#!/bin/bash
+# pre-push: запуск тестов перед отправкой
+echo "Запуск тестов перед push..."
+if [ ! -f ".gitlab-ci.yml" ]; then
+  echo "Внимание: .gitlab-ci.yml не найден."
+fi
+if [ -f "test.py" ]; then
+  python3 test.py || { echo "Тесты не прошли. Push отклонён."; exit 1; }
+else
+  echo "Тесты не найдены, пропускаем."
+fi
+echo "Готово к push."
+exit 0

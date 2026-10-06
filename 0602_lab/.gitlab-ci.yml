@@ -1,0 +1,87 @@
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: always
+
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+lint:
+  stage: lint
+  image: python:3.11-slim
+  script:
+    - pip install flake8 bandit
+    - flake8 app.py --max-line-length=120 --statistics
+    - bandit -r app.py
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+security_scan:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - echo "Проверка безопасности зависимостей..."
+    - pip install safety
+    - safety check -r requirements.txt
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  allow_failure: true
+
+build:
+  stage: build
+  image: python:3.11-slim
+  script:
+    - echo "Установка зависимостей..."
+    - pip install --cache-dir=$PIP_CACHE_DIR -r requirements.txt
+    - echo "Зависимости установлены"
+  artifacts:
+    paths:
+      - .cache/pip
+    expire_in: 1 hour
+
+test:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - echo "Запуск тестов..."
+    - pip install -r requirements.txt
+    - python -m pytest tests/ -v --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+    paths:
+      - report.xml
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy_staging:
+  stage: deploy
+  image: python:3.11-slim
+  script:
+    - echo "Развертывание на staging..."
+    - pip install -r requirements.txt
+    - nohup python app.py > /tmp/flask-staging.log 2>&1 &
+    - sleep 3
+    - curl -sf http://localhost:5000/health
+    - echo "Staging deployment verified"
+  environment:
+    name: staging
+    url: http://localhost:5000
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  when: manual

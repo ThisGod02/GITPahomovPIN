@@ -1,0 +1,72 @@
+stages:
+  - test
+  - build
+  - deploy
+  - cleanup
+
+test:
+  stage: test
+  image: node:18-alpine
+  script:
+    - npm install
+    - npm test
+
+build:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploy $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA to staging (ENVIRONMENT=staging, APP_VERSION=$CI_COMMIT_SHORT_SHA)"
+  environment:
+    name: staging
+    url: https://staging.example.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploy $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA to production"
+  environment:
+    name: production
+    url: https://example.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  when: manual
+
+review:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploy review app for $CI_COMMIT_REF_SLUG"
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$CI_COMMIT_REF_SLUG.review.example.com
+    on_stop: stop_review
+    auto_stop_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+stop_review:
+  stage: cleanup
+  image: alpine:latest
+  script:
+    - echo "Stop review app for $CI_COMMIT_REF_SLUG"
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  when: manual

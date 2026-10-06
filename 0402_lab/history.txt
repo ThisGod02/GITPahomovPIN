@@ -1,0 +1,9 @@
+* d74a041 feat: add lines 3-5 (squashed)
+* de59192 feat: add line 2
+* 19f90a0 feat: add line 1
+* 58e47c0 feat: add app function
+* 714d09a Revert "feat: update file2"
+* f00e874 feat: update file2
+* a5caebf feat: add file3 with description
+* ad1832a feat: add file2
+* 86cd8f2 feat: add file1

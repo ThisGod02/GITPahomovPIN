@@ -1,0 +1,9 @@
+*   061e1fe Merge branch 'feature/calculator'
+|\  
+| * 96fa037 feat: add calculator module
+|/  
+*   6ce97cb Merge branch 'feature/add_contributor'
+|\  
+| * f7e18fb docs: add self to contributors
+|/  
+* 26b9e32 docs: add CONTRIBUTORS.md

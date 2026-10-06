@@ -1,0 +1,23 @@
+*   0a39152 Merge branch 'hotfix/auth-fix' into develop
+|\  
+* \   c2e2f76 Merge branch 'release/v1.0' into develop
+|\ \  
+| | | *   a4b559e Merge branch 'hotfix/auth-fix' into main
+| | | |\  
+| | | |/  
+| | |/|   
+| | * | bb99ab8 fix: resolve auth session handling
+| | |/  
+| | *   b42c172 Merge branch 'release/v1.0' into main
+| | |\  
+| | |/  
+| |/|   
+| * | 14d51b2 chore: bump version to 1.0.0
+|/ /  
+* |   49b4695 Merge branch 'feature/login' into develop
+|\ \  
+| |/  
+|/|   
+| * 8af6cbf feat: add login module
+|/  
+* 521a11f chore: initial commit

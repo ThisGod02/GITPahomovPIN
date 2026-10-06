@@ -1,0 +1,65 @@
+# Определение стадий пайплайна
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  PYTHON_VERSION: "3.10"
+
+default:
+  image: python:3.10-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - python --version
+    - pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt found"
+
+lint:
+  stage: lint
+  script:
+    - echo "Проверка синтаксиса Python-файлов..."
+    - find . -name "*.py" -type f -exec python3 -m py_compile {} \;
+    - echo "Синтаксис корректен."
+  only:
+    - merge_requests
+    - main
+    - develop
+
+test:
+  stage: test
+  script:
+    - echo "Запуск тестов..."
+    - |
+      if [ -f "test.py" ]; then
+        python3 test.py
+        echo "Тесты пройдены."
+      else
+        echo "Тесты не найдены."
+      fi
+  only:
+    - merge_requests
+    - main
+
+build:
+  stage: build
+  script:
+    - echo "Сборка приложения..."
+    - mkdir -p dist
+    - echo "Build date: $(date)" > dist/version.txt
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 30 days
+  only:
+    - main
+
+coverage:
+  stage: test
+  script:
+    - echo "Проверка покрытия кода..."
+    - pip install coverage 2>/dev/null || true
+    - coverage run -m unittest discover 2>/dev/null || echo "No unit tests"
+    - coverage report 2>/dev/null || echo "Coverage report not available"
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+\.\d+%)/'
+  only:
+    - merge_requests

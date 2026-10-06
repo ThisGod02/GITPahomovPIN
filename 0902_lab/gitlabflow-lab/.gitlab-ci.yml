@@ -1,0 +1,31 @@
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - python -m py_compile app.py
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy_staging:
+  stage: deploy
+  script:
+    - echo "Deploy to staging"
+  environment:
+    name: staging
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy_production:
+  stage: deploy
+  script:
+    - echo "Deploy to production"
+  environment:
+    name: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  when: manual

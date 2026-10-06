@@ -1,0 +1,13 @@
+*   c5b7fce Merge branch 'feature/third' into main
+|\  
+| * 7cfffe2 feat: add third feature
+|/  
+* 85fa1ff fix: add corrected feature
+* d71e78c feat: add first feature
+*   ca490e2 Merge branch 'feature/profile' into main
+|\  
+| * e4c4e3b feat: extend profile view
+* | 7ac0708 feat: update profile line on main
+|/  
+* ca05d3d feat: add payment method
+* 318c464 feat: add features.txt with core features
